@@ -21,26 +21,6 @@ services:
     networks:
       - game_node_app
 
-  redis:
-    hostname: matomo_redis
-    image: redis:latest
-    environment:
-      ALLOW_EMPTY_PASSWORD: 'yes'
-
-    restart: always
-
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-
-    deploy:
-      replicas: 2
-
-    volumes:
-      - redis:/var/lib/redis
-
-    networks:
-      - game_node_app
-
   # Uses Apache pointing to :80 internally
   # TODO: Move config to Nginx/NPM
   matomo:
