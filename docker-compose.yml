@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  db:
+    hostname: matomo_db
+    image: mariadb:11.3
+    command: --max-allowed-packet=64MB
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MATOMO_DB_PASSWORD}
+      - MYSQL_DATABASE=${MATOMO_DB_DATABASE}
+      - MYSQL_MYSQL_USER=${MATOMO_DB_USER}
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+    env_file:
+      - ./db.env
+    networks:
+      - game_node_app
+
+  # Uses Apache pointing to :80 internally
+  # TODO: Move config to Nginx/NPM
+  matomo:
+    hostname: matomo
+    image: matomo
+    restart: always
+    environment:
+      - MATOMO_DATABASE_HOST=matomo_db
+      - MATOMO_DATABASE_USERNAME=${MATOMO_DB_USER}
+      - MATOMO_DATABASE_PASSWORD=${MATOMO_DB_PASSWORD}
+      - MATOMO_DATABASE_DBNAME=${MATOMO_DB_DATABASE}
+    volumes:
+      - matomo:/var/www/html
+
+    env_file:
+      - ./db.env
+
+    networks:
+      - game_node_app
+      - game_node_app_public
+
+networks:
+  game_node_app:
+    external: true
+  game_node_app_public:
+    external: true
+
+volumes:
+  db:
+  matomo:
